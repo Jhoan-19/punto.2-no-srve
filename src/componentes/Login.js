@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
@@ -7,14 +7,20 @@ import { useNavigation } from '@react-navigation/native';
 export default function Login() {
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [mensaje, setMensaje] = useState('');
   const navigation = useNavigation();
 
   const handleLogin = async () => {
+    setMensaje('');
+    if (!correo || !contrasena) {
+      setMensaje('Por favor ingresa tu correo y contraseña');
+      return;
+    }
     try {
       await signInWithEmailAndPassword(auth, correo, contrasena);
       // Aquí puedes navegar a la pantalla principal si lo deseas
     } catch (error) {
-      Alert.alert('Error al iniciar sesión', error.message);
+      setMensaje('Correo o contraseña incorrectos');
     }
   };
 
@@ -37,6 +43,9 @@ export default function Login() {
         secureTextEntry
       />
       <Button title="Ingresar" onPress={handleLogin} />
+      {mensaje !== '' && (
+        <Text style={styles.error}>{mensaje}</Text>
+      )}
       <View style={{ marginTop: 10 }}>
         <Button
           title="¿No tienes cuenta? Regístrate"
@@ -64,5 +73,11 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     borderRadius: 6,
+  },
+  error: {
+    color: '#cc0000',
+    textAlign: 'center',
+    marginTop: 10,
+    fontWeight: 'bold',
   },
 });
